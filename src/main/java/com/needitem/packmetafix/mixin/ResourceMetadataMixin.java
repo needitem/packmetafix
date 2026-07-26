@@ -1,7 +1,6 @@
 package com.needitem.packmetafix.mixin;
 
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.needitem.packmetafix.PackMetaFix;
 import com.needitem.packmetafix.PackMetaSanitizer;
 import net.minecraft.server.packs.resources.ResourceMetadata;
@@ -23,11 +22,10 @@ import java.nio.charset.StandardCharsets;
  * repaired and then handed back to the untouched vanilla parser, which keeps the error handling and
  * the returned implementation exactly as they were.
  */
+// Mixin forbids non-shadow fields in an interface mixin (they would become public static final on
+// the target), so anything constant-like lives in PackMetaSanitizer instead.
 @Mixin(ResourceMetadata.class)
 public interface ResourceMetadataMixin {
-
-    /** UTF-8 byte order mark — legal in a pack.mcmeta, but Gson will not parse past it. */
-    int BOM = 0xFEFF;
 
     @Inject(method = "fromJsonStream", at = @At("HEAD"), cancellable = true)
     private static void packmetafix$repairLegacyFormats(InputStream stream, CallbackInfoReturnable<ResourceMetadata> cir) throws IOException {
@@ -40,12 +38,7 @@ public interface ResourceMetadataMixin {
         byte[] repaired = original;
 
         try {
-            String text = new String(original, StandardCharsets.UTF_8);
-            if (!text.isEmpty() && text.charAt(0) == BOM) {
-                text = text.substring(1);
-            }
-
-            JsonObject root = JsonParser.parseString(text).getAsJsonObject();
+            JsonObject root = PackMetaSanitizer.parse(original);
             int sections = PackMetaSanitizer.repair(root);
             if (sections > 0) {
                 repaired = root.toString().getBytes(StandardCharsets.UTF_8);

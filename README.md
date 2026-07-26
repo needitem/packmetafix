@@ -38,6 +38,27 @@ exactly as it would without the mod.
 
 It covers built-in, local and server-supplied packs alike, and needs no configuration.
 
+### Outdated core shaders
+
+Getting the pack accepted is only half the job. Packs of this vintage also ship
+`assets/minecraft/shaders/core/*` written against the old uniform layout, and those no longer
+compile:
+
+```
+Couldn't compile fragment shader (minecraft:core/rendertype_text):
+  error C1038: declaration of "FogColor" conflicts with previous declaration
+Couldn't compile pipeline minecraft:pipeline/gui_text
+Caught error loading resourcepacks, removing all selected resourcepacks
+```
+
+When the text pipelines fail to build, Minecraft drops **every** selected pack — so a stale shader
+costs you the fonts too, and the boxes come right back. PackMetaFix therefore hides the `shaders`
+directory of server-supplied packs, letting the client fall back to its own working shaders and keep
+the rest of the pack. Custom shader effects are lost; fonts, HUD graphics and textures survive.
+
+Packs you installed yourself are left untouched — a local pack is a deliberate choice, and a modern
+one may ship shaders that compile fine.
+
 ## Install
 
 Requires Fabric Loader and Minecraft 26.1+. No Fabric API dependency.

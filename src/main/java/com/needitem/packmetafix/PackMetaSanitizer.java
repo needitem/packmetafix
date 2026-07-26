@@ -3,7 +3,10 @@ package com.needitem.packmetafix;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
+
+import java.nio.charset.StandardCharsets;
 
 /**
  * Rewrites legacy pack format declarations in a {@code pack.mcmeta} document into the explicit
@@ -24,7 +27,23 @@ public final class PackMetaSanitizer {
     /** Minecraft rejects multi-version packs that declare a lower bound below this. */
     private static final int MIN_MULTI_VERSION_FORMAT = 15;
 
+    /** UTF-8 byte order mark — legal in a pack.mcmeta, but Gson will not parse past it. */
+    private static final char BOM = '\uFEFF';
+
     private PackMetaSanitizer() {
+    }
+
+    /**
+     * Decodes a {@code pack.mcmeta} document, tolerating a leading byte order mark.
+     *
+     * @throws RuntimeException if the bytes are not a JSON object
+     */
+    public static JsonObject parse(byte[] bytes) {
+        String text = new String(bytes, StandardCharsets.UTF_8);
+        if (!text.isEmpty() && text.charAt(0) == BOM) {
+            text = text.substring(1);
+        }
+        return JsonParser.parseString(text).getAsJsonObject();
     }
 
     /**
