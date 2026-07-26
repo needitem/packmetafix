@@ -1,0 +1,55 @@
+plugins {
+    id 'base'
+    id "fabric-loom" version "1.16-SNAPSHOT"
+}
+
+version = project.mod_version
+group = project.maven_group
+
+base {
+    archivesName.set(project.archives_base_name)
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Minecraft 26.1.x ships de-obfuscated, so Loom runs with obfuscation disabled
+    // (see fabric.loom.disableObfuscation in gradle.properties). In that mode the
+    // remapping configurations (modImplementation) are unavailable, so dependencies
+    // are consumed as plain implementation like the official template.
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+}
+
+tasks {
+    processResources {
+        inputs.property("version", project.version)
+        inputs.property("mc_version", project.minecraft_version)
+
+        filesMatching("fabric.mod.json") {
+            expand([
+                "version"   : project.version,
+                "mc_version": project.minecraft_version
+            ])
+        }
+    }
+
+    jar {
+        from("LICENSE") {
+            rename { "${it}_${archiveBaseName.get()}" }
+        }
+    }
+
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(project.jdk_version.toInteger())
+        }
+    }
+
+    tasks.withType(JavaCompile).configureEach {
+        it.options.encoding = "UTF-8"
+        it.options.release = project.jdk_version.toInteger()
+    }
+}

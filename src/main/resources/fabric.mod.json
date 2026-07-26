@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "packmetafix",
+  "version": "${version}",
+  "name": "PackMetaFix",
+  "description": "Loads resource packs that modern Minecraft would otherwise throw away. Packs built for older versions declare their overlays with the legacy pack_format/formats keys; since pack format 64 Minecraft demands min_format and max_format instead, and rejects the whole pack when they are missing, taking every custom font and HUD graphic with it. PackMetaFix rewrites those declarations in memory before the pack is parsed. Most visible when joining older servers through ViaFabricPlus.",
+  "authors": [
+    "needitem"
+  ],
+  "contact": {
+    "homepage": "https://github.com/needitem/packmetafix",
+    "sources": "https://github.com/needitem/packmetafix",
+    "issues": "https://github.com/needitem/packmetafix/issues"
+  },
+  "license": "MIT",
+  "environment": "*",
+  "mixins": [
+    "packmetafix.mixins.json"
+  ],
+  "depends": {
+    "java": ">=25",
+    "minecraft": ">=26.1",
+    "fabricloader": ">=0.16"
+  }
+}
